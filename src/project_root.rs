@@ -17,10 +17,11 @@ pub fn roots_by_marker(roots: &[String], path: &str) -> String {
     while !pwd.is_dir() {
         pwd.pop();
     }
-    let src = pwd.to_str().unwrap().to_string();
+    let src = pwd.clone();
 
-    loop {
-        for root in roots {
+    for root in roots {
+        pwd = src.clone();
+        loop {
             // unwrap should be safe here because we walk up path previously converted from str
             let matches = glob(pwd.join(root).to_str().unwrap());
             if let Ok(mut m) = matches {
@@ -29,11 +30,12 @@ pub fn roots_by_marker(roots: &[String], path: &str) -> String {
                     return pwd.to_str().unwrap().to_string();
                 }
             }
-        }
-        if !pwd.pop() {
-            return src;
+            if !pwd.pop() {
+              break;
+            }
         }
     }
+    return src.to_str().unwrap().to_string();
 }
 
 pub fn gather_env_roots(language: &str) -> HashSet<PathBuf> {
